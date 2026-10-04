@@ -14,3 +14,5 @@ admin/dist/
 app/dist/
 backend/.python-version
 backend/.venv/
+.idea
+.vscode
