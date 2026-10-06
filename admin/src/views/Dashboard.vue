@@ -35,8 +35,14 @@ function summarizeOrders(orders) {
   };
 }
 
+function isToday(iso) {
+  const d = new Date(iso);
+  const now = new Date();
+  return d.toDateString() === now.toDateString();
+}
+
 onMounted(async () => {
   const { data } = await http.get("/orders/admin");
-  stats.value = summarizeOrders(data);
+  stats.value = summarizeOrders((data || []).filter((o) => isToday(o.created_at)));
 });
 </script>

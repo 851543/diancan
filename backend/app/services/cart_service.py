@@ -1,16 +1,13 @@
-"""
-顾客端购物车：MySQL 表 cart_items 落库，Redis Hash 加速。
-Java 对照：DB + RedisTemplate.opsForHash()
-key = cart:{user_id}，field=dish_id，value=qty
-"""
+"""购物车：MySQL 落库 + Redis Hash。key = cart:{user_id}"""
 
 import logging
 
 import redis
 from sqlalchemy.orm import Session
 
+from app.db.redis import redis_client
 from app.models import CartItem, Dish
-from app.redis_client import redis_client
+from app.schemas import CartLineOut, CartOut
 
 logger = logging.getLogger("diancan")
 
@@ -102,6 +99,20 @@ def get_items(db: Session, user_id: int) -> list[dict]:
     items.sort(key=lambda x: x["dish_id"])
     logger.info("购物车明细 user=%s 共 %s 条", user_id, len(items))
     return items
+
+
+def to_out(items: list[dict]) -> CartOut:
+    return CartOut(
+        items=[
+            CartLineOut(
+                dish_id=row["dish_id"],
+                name=row["name"],
+                price_cents=row["price_cents"],
+                qty=row["qty"],
+            )
+            for row in items
+        ]
+    )
 
 
 def clear_cart(db: Session, user_id: int) -> None:

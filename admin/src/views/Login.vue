@@ -4,15 +4,14 @@
       <h2>商家登录</h2>
       <el-form @submit.prevent="onSubmit">
         <el-form-item label="账号">
-          <el-input v-model="username" />
+          <el-input v-model="username" autocomplete="username" />
         </el-form-item>
         <el-form-item label="密码">
-          <el-input v-model="password" type="password" />
+          <el-input v-model="password" type="password" autocomplete="current-password" />
         </el-form-item>
         <el-button type="primary" native-type="submit" :loading="loading" style="width: 100%">
           登录
         </el-button>
-        <p class="hint">演示账号 admin / admin123</p>
       </el-form>
     </el-card>
   </div>
@@ -22,11 +21,11 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
-import http from "../api";
+import http, { errorText } from "../api";
 
 const router = useRouter();
-const username = ref("admin");
-const password = ref("admin123");
+const username = ref("");
+const password = ref("");
 const loading = ref(false);
 
 async function onSubmit() {
@@ -44,7 +43,7 @@ async function onSubmit() {
     localStorage.setItem("username", data.username);
     router.push("/");
   } catch (e) {
-    ElMessage.error(e.response?.data?.detail || "登录失败");
+    ElMessage.error(errorText(e.response?.data, "登录失败"));
   } finally {
     loading.value = false;
   }
@@ -58,10 +57,5 @@ async function onSubmit() {
   align-items: center;
   justify-content: center;
   background: #f5f7fa;
-}
-.hint {
-  color: #888;
-  font-size: 12px;
-  margin-top: 12px;
 }
 </style>

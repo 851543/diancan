@@ -11,6 +11,10 @@
         </view>
       </view>
     </view>
+    <view class="card" v-if="items.length">
+      <input class="remark" v-model="remark" placeholder="备注（选填）" />
+      <button size="mini" @click="clear">清空购物车</button>
+    </view>
     <view class="bar" v-if="items.length">
       <text>合计 ¥ {{ yuan(total) }}</text>
       <button type="primary" @click="submit">下单</button>
@@ -20,12 +24,12 @@
 
 <script>
 import { request } from "../../utils/api";
-import { addCartItem, fetchCart } from "../../utils/cart";
+import { addCartItem, clearCart, fetchCart } from "../../utils/cart";
 import { cartTotal, yuan } from "../../utils/price";
 
 export default {
   data() {
-    return { items: [] };
+    return { items: [], remark: "" };
   },
   computed: {
     total() {
@@ -58,13 +62,23 @@ export default {
         uni.showToast({ title: (e && e.detail) || "修改失败", icon: "none" });
       }
     },
+    async clear() {
+      try {
+        await clearCart();
+        this.items = [];
+        this.remark = "";
+      } catch (e) {
+        uni.showToast({ title: (e && e.detail) || "清空失败", icon: "none" });
+      }
+    },
     async submit() {
       try {
         await request("/orders", "POST", {
           items: this.items.map((i) => ({ dish_id: i.dish_id, qty: i.qty })),
-          remark: "",
+          remark: (this.remark || "").trim(),
         });
         this.items = [];
+        this.remark = "";
         uni.showToast({ title: "下单成功" });
         uni.switchTab({ url: "/pages/orders/orders" });
       } catch (e) {
@@ -79,6 +93,12 @@ export default {
 .page { padding: 16px 16px 80px; }
 .card { background: #fff; padding: 14px; border-radius: 12px; margin-bottom: 10px; }
 .row { display: flex; justify-content: space-between; margin-top: 8px; }
+.remark {
+  background: #f6f6f6;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
 .empty { text-align: center; color: #888; margin-top: 40px; }
 .bar {
   position: fixed; left: 0; right: 0; bottom: 0;

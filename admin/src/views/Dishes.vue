@@ -25,9 +25,10 @@
       <el-table-column label="上架" width="80">
         <template #default="{ row }">{{ row.is_on ? "是" : "否" }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="140">
+      <el-table-column label="操作" width="200">
         <template #default="{ row }">
           <el-button size="small" @click="openEdit(row)">编辑</el-button>
+          <el-button size="small" type="danger" @click="remove(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -39,6 +40,9 @@
         <el-form-item label="简介"><el-input v-model="form.description" /></el-form-item>
         <el-form-item label="价格(分)">
           <el-input-number v-model="form.price_cents" :min="1" :step="100" />
+        </el-form-item>
+        <el-form-item label="图片">
+          <el-input v-model="form.image_url" placeholder="图片 URL（选填）" />
         </el-form-item>
         <el-form-item label="上架">
           <el-switch v-model="form.is_on" :active-value="1" :inactive-value="0" />
@@ -117,6 +121,16 @@ async function save() {
   ElMessage.success("已保存");
   visible.value = false;
   load();
+}
+
+async function remove(row) {
+  try {
+    await http.delete(`/dishes/admin/${row.id}`);
+    ElMessage.success("已删除");
+    load();
+  } catch (e) {
+    ElMessage.error(e.response?.data?.detail || "删除失败");
+  }
 }
 
 onMounted(load);

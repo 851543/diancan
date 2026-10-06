@@ -12,6 +12,18 @@ function resolveBaseUrl() {
 
 export const BASE_URL = resolveBaseUrl();
 
+export function errorText(data, fallback = "请求失败") {
+  const d = data && data.detail;
+  if (typeof d === "string" && d) return d;
+  if (Array.isArray(d) && d[0] && d[0].msg) return d[0].msg;
+  if (typeof data === "string" && data) return data;
+  return fallback;
+}
+
+function isAuthPath(path) {
+  return path.indexOf("/auth/login") !== -1 || path.indexOf("/auth/register") !== -1;
+}
+
 export function request(url, method, data) {
   const token = uni.getStorageSync("token");
   const path = url.startsWith("/") ? url : `/${url}`;
@@ -27,7 +39,7 @@ export function request(url, method, data) {
       success: (res) => {
         if (res.statusCode >= 200 && res.statusCode < 300) resolve(res.data);
         else {
-          if (res.statusCode === 401) {
+          if (res.statusCode === 401 && !isAuthPath(path)) {
             uni.removeStorageSync("token");
             uni.navigateTo({ url: "/pages/login/login" });
           }

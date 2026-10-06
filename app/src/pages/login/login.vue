@@ -5,16 +5,15 @@
     <input class="input" v-model="password" password placeholder="密码" />
     <button type="primary" @click="login">登录</button>
     <button @click="register">注册</button>
-    <view class="hint">演示 user / user123</view>
   </view>
 </template>
 
 <script>
-import { request } from "../../utils/api";
+import { errorText, request } from "../../utils/api";
 
 export default {
   data() {
-    return { username: "user", password: "user123" };
+    return { username: "", password: "" };
   },
   methods: {
     async login() {
@@ -23,12 +22,17 @@ export default {
           username: this.username,
           password: this.password,
         });
+        if (data.role === "admin") {
+          uni.showToast({ title: "请用顾客账号登录", icon: "none" });
+          return;
+        }
         uni.setStorageSync("token", data.access_token);
         uni.switchTab({ url: "/pages/menu/menu" });
       } catch (e) {
         uni.showToast({
-          title: (e && e.detail) || "登录失败",
+          title: errorText(e, "登录失败"),
           icon: "none",
+          duration: 2500,
         });
       }
     },
@@ -41,7 +45,7 @@ export default {
         uni.setStorageSync("token", data.access_token);
         uni.switchTab({ url: "/pages/menu/menu" });
       } catch (e) {
-        uni.showToast({ title: (e && e.detail) || "注册失败", icon: "none" });
+        uni.showToast({ title: errorText(e, "注册失败"), icon: "none", duration: 2500 });
       }
     },
   },
@@ -57,5 +61,4 @@ export default {
   border-radius: 8px;
   margin-bottom: 12px;
 }
-.hint { color: #888; margin-top: 16px; font-size: 12px; }
 </style>

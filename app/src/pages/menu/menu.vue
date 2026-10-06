@@ -26,6 +26,7 @@
     </scroll-view>
     <view v-if="!dishes.length" class="empty">没有符合条件的菜品</view>
     <view v-for="d in dishes" :key="d.id" class="card">
+      <image v-if="d.image_url" class="pic" :src="d.image_url" mode="aspectFill" />
       <view class="name">{{ d.name }}</view>
       <view class="meta">{{ d.category }} · {{ d.description }}</view>
       <view class="row">
@@ -123,6 +124,7 @@ export default {
   padding: 14px;
   margin-bottom: 12px;
 }
+.pic { width: 100%; height: 140px; border-radius: 8px; margin-bottom: 8px; }
 .name { font-size: 18px; font-weight: 600; }
 .meta { color: #888; margin: 6px 0; }
 .row { display: flex; justify-content: space-between; align-items: center; }
